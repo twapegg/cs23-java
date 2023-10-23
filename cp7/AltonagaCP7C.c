@@ -35,7 +35,7 @@ int menu(void);
 char *categoryBMI(float bmi);
 
 void dataEntry(node *queue, node *front, node *rear);
-// void dataEditByName(node *stack, node *top);
+void dataEditByName(node *queue, node *front, node *rear);
 // void dataDeleteByName(node *stack, node *top);
 void dataDisplay(node *queue, node *front, node *rear);
 
@@ -59,7 +59,7 @@ int main(void)
             dataEntry(&queue, &front, &rear);
             break;
         case 3:
-            // dataEditByName(&queue, &rear);
+            dataEditByName(&queue, &front, &rear);
             break;
         case 4:
             // dataDeleteByName(&queue, &rear);
@@ -95,12 +95,12 @@ int menu(void)
         printf("Enter choice: ");
         scanf("%d", &choice);
 
-        if (choice < 1 || choice > 7)
+        if (choice < 1 || choice > 6)
         {
             printf("Invalid option. Please enter a valid option.\n");
             getch();
         }
-    } while (choice < 1 || choice > 7);
+    } while (choice < 1 || choice > 6);
     return choice;
 }
 
@@ -138,16 +138,18 @@ void createQueue(node *queue, node *front, node *rear, bool *isChecked)
 */
 void enqueue(node *queue, node *front, node *rear, node data)
 {
-    // insert at rear
+    // if empty, add at head
     if (emptyQueue(queue))
     {
-        *queue = data;
-        *front = *queue;
-        *rear = *queue;
+        *front = data;
+        (*front)->next = NULL;
+        *queue = *front;
+        *rear = data;
         return;
     }
 
     (*rear)->next = data;
+    *rear = data;
 }
 
 /*  function to dequeue element from queue
@@ -158,15 +160,9 @@ void enqueue(node *queue, node *front, node *rear, node data)
 */
 node dequeue(node *queue, node *front)
 {
-    // if queue is empty, return NULL
-    if (emptyQueue(queue))
-    {
-        return NULL;
-    }
-
-    // else, return front
     node temp = *front;
     *front = (*front)->next;
+    *queue = *front;
     return temp;
 }
 
@@ -188,6 +184,7 @@ bool emptyQueue(node *queue)
 void dataEntry(node *queue, node *front, node *rear)
 {
     node temp = malloc(sizeof(Person));
+
     // if malloc fails, exit program
     if (temp == NULL)
     {
@@ -198,8 +195,8 @@ void dataEntry(node *queue, node *front, node *rear)
     char tempFirstName[TEXTSIZE];
     char tempLastName[TEXTSIZE];
 
-    fflush(stdin); // clear input buffer
     system("cls");
+    fflush(stdin); // clear input buffer
 
     printf("Enter first name: ");
     fgets(tempFirstName, TEXTSIZE, stdin);
@@ -257,114 +254,115 @@ char *categoryBMI(float bmi)
 /*  function to edit element in stack
     @param (node *) top
 */
-// void dataEditByName(node *stack, node *top)
-// {
-//     // check if stack is empty
-//     if (isEmpty(top))
-//     {
-//         printf("Stack is empty. Press any key to continue.\n");
-//         getch();
-//         return;
-//     }
+void dataEditByName(node *queue, node *front, node *rear)
+{
 
-//     char tempFirstName[TEXTSIZE];
-//     char tempLastName[TEXTSIZE];
+    // check if queue is empty
+    if (emptyQueue(queue))
+    {
+        printf("Queue is empty. Press any key to continue.\n");
+        getch();
+        return;
+    }
 
-//     fflush(stdin); // clear input buffer
-//     system("cls");
+    char tempFirstName[TEXTSIZE];
+    char tempLastName[TEXTSIZE];
 
-//     printf("Enter first name: ");
-//     fgets(tempFirstName, TEXTSIZE, stdin);
-//     tempFirstName[strcspn(tempFirstName, "\n")] = '\0'; // remove newline character
+    fflush(stdin); // clear input buffer
+    system("cls");
 
-//     printf("Enter last name: ");
-//     fgets(tempLastName, TEXTSIZE, stdin);
-//     tempLastName[strcspn(tempLastName, "\n")] = '\0'; // remove newline character
+    printf("Enter first name: ");
+    fgets(tempFirstName, TEXTSIZE, stdin);
+    tempFirstName[strcspn(tempFirstName, "\n")] = '\0'; // remove newline character
 
-//     node t = *top; // temp node to hold top
-//     node tempStack = NULL;
-//     node tempTop = NULL;  // temp stack top holder
-//     bool isFound = false; // flag to check if data is found
+    printf("Enter last name: ");
+    fgets(tempLastName, TEXTSIZE, stdin);
+    tempLastName[strcspn(tempLastName, "\n")] = '\0'; // remove newline character
 
-//     // pop element, display returned element from pop, then push element to a temp stack
-//     while (t != NULL)
-//     {
-//         node temp = pop(stack, &t);
-//         if (stricmp(temp->firstName, tempFirstName) == 0 && stricmp(temp->lastName, tempLastName) == 0)
-//         {
-//             isFound = true;
-//             // display element
-//             system("cls");
-//             printf("Record found. Displaying record...\n");
-//             printf("\n%-20s%-20s%-20s%-20s%-20s%-20s\n", "First Name", "Last Name", "Height (m)", "Weight (kg)", "BMI", "BMI Category");
-//             printf("%-20s%-20s%-20.2f%-20.2f%-20.2f%-20s\n", strupr(temp->firstName), strupr(temp->lastName), temp->height, temp->weight, temp->bmi, temp->category);
+    node f = *front; // temp node to hold top
+    node tempQueue = NULL;
+    node tempFront = NULL;
+    node tempRear = NULL;
+    bool isFound = false; // flag to check if data is found
 
-//             char choice;
-//             printf("\nDo you want to edit this record? (y/n): ");
+    while (f != NULL)
+    {
+        node temp = dequeue(queue, &f);
+        if (stricmp(temp->firstName, tempFirstName) == 0 && stricmp(temp->lastName, tempLastName) == 0)
+        {
+            isFound = true;
+            // display element
+            system("cls");
+            printf("Record found. Displaying record...\n");
+            printf("\n%-20s%-20s%-20s%-20s%-20s%-20s\n", "First Name", "Last Name", "Height (m)", "Weight (kg)", "BMI", "BMI Category");
+            printf("%-20s%-20s%-20.2f%-20.2f%-20.2f%-20s\n", strupr(temp->firstName), strupr(temp->lastName), temp->height, temp->weight, temp->bmi, temp->category);
 
-//             do
-//             {
-//                 scanf(" %c", &choice);
-//                 choice = tolower(choice);
-//                 if (choice != 'y' && choice != 'n')
-//                 {
-//                     printf("Invalid option. Please enter a valid option.\n");
-//                 }
-//                 if (choice == 'y')
-//                 {
-//                     // get new data
-//                     printf("\nEnter new height (in cm): ");
-//                     scanf("%f", &temp->height);
+            char choice;
+            printf("\nDo you want to edit this record? (y/n): ");
 
-//                     printf("Enter new weight (in lbs): ");
-//                     scanf("%f", &temp->weight);
+            do
+            {
+                scanf(" %c", &choice);
+                choice = tolower(choice);
+                if (choice != 'y' && choice != 'n')
+                {
+                    printf("Invalid option. Please enter a valid option.\n");
+                }
+                if (choice == 'y')
+                {
+                    // get new data
+                    printf("\nEnter new height (in cm): ");
+                    scanf("%f", &temp->height);
 
-//                     temp->height /= 100;                                      // convert cm to m
-//                     temp->weight *= 0.453592;                                 // convert lbs to kg
-//                     temp->bmi = temp->weight / (temp->height * temp->height); // calculate bmi
-//                     strcpy(temp->category, categoryBMI(temp->bmi));           // get category
+                    printf("Enter new weight (in lbs): ");
+                    scanf("%f", &temp->weight);
 
-//                     // push element back to stack
-//                     push(stack, &t, temp);
-//                     printf("\nData has been edited. Press any key to continue.\n");
-//                     getch();
-//                     break;
-//                 }
-//                 if (choice == 'n')
-//                 {
-//                     // push element back to stack
-//                     push(stack, &t, temp);
-//                     printf("\nData has not been edited. Press any key to continue.\n");
-//                     getch();
-//                     break;
-//                 }
-//             } while (choice != 'y' && choice != 'n');
+                    temp->height /= 100;                                      // convert cm to m
+                    temp->weight *= 0.453592;                                 // convert lbs to kg
+                    temp->bmi = temp->weight / (temp->height * temp->height); // calculate bmi
+                    strcpy(temp->category, categoryBMI(temp->bmi));           // get category
 
-//             break; // since data is found, break out of loop
-//         }
-//         // if data does not match, push element to temp stack
-//         push(&tempStack, &tempTop, temp);
-//     }
+                    // enqueue element back to queue
+                    enqueue(queue, front, rear, temp);
+                    printf("\nData has been edited. Press any key to continue.\n");
+                    getch();
+                    break;
+                }
+                if (choice == 'n')
+                {
+                    // enqueue element back to queue
+                    enqueue(queue, front, rear, temp);
+                    printf("\nData has not been edited. Press any key to continue.\n");
+                    getch();
+                    break;
+                }
+            } while (choice != 'y' && choice != 'n');
 
-//     // push elements back to original stack
-//     while (tempStack != NULL)
-//     {
-//         node temp = pop(&tempStack, &tempTop);
-//         push(stack, &t, temp);
-//     }
+            break; // since data is found, break out of loop
+        }
+        // if data does not match, push element to temp stack
+        enqueue(&tempQueue, &tempFront, &tempRear, temp);
+    }
 
-//     // if data is not found, display message
-//     if (!isFound)
-//     {
-//         printf("\nData not found. Press any key to continue.\n");
-//         getch();
-//         return;
-//     }
+    // enqueue elements back to original queue
+    while (tempQueue != NULL)
+    {
+        node temp = dequeue(&tempQueue, &tempFront);
+        enqueue(queue, front, rear, temp);
+    }
 
-//     *top = t; // update top
-//     *stack = *top;
-//     return;
-// }
+    // if data is not found, display message
+    if (!isFound)
+    {
+        printf("\nData not found. Press any key to continue.\n");
+        getch();
+        return;
+    }
+
+    *front = f; // update top
+    *queue = *front;
+    return;
+}
 
 /*  function to delete element from stack
     @param (node *) top
@@ -479,9 +477,7 @@ void dataDisplay(node *queue, node *front, node *rear)
     }
 
     // else, display all elements
-    node t = *front; // temp node to hold front
-
-    // temp queue
+    node f = *front; // temp node to hold front
     node tempQueue = NULL;
     node tempFront = NULL;
     node tempRear = NULL;
@@ -490,15 +486,12 @@ void dataDisplay(node *queue, node *front, node *rear)
 
     printf("\n%-20s%-20s%-20s%-20s%-20s%-20s\n", "First Name", "Last Name", "Height (m)", "Weight (kg)", "BMI", "BMI Category");
 
-    while (t != NULL)
+    while (f != NULL)
     {
-        node temp = dequeue(queue, front);
+        node temp = dequeue(queue, &f);
         printf("%-20s%-20s%-20.2f%-20.2f%-20.2f%-20s\n", strupr(temp->firstName), strupr(temp->lastName), temp->height, temp->weight, temp->bmi, temp->category);
-        printf("yo");
         enqueue(&tempQueue, &tempFront, &tempRear, temp);
     }
-
-    printf("yo");
 
     // enqueue elements back to original queue
     while (tempQueue != NULL)
